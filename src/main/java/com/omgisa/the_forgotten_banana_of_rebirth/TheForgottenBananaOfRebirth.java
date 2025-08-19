@@ -9,7 +9,6 @@ import com.omgisa.the_forgotten_banana_of_rebirth.item.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -36,6 +35,7 @@ public class TheForgottenBananaOfRebirth {
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
+    @SuppressWarnings("unused")
     public TheForgottenBananaOfRebirth(IEventBus modEventBus, ModContainer modContainer) {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
@@ -66,10 +66,7 @@ public class TheForgottenBananaOfRebirth {
 
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
-
-        }
-
+        // Intentionally left empty for now
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

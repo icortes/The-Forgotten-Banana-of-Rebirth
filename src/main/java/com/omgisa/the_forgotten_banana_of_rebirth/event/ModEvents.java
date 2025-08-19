@@ -33,6 +33,13 @@ public class ModEvents {
     private static final Map<UUID, Integer> HEARTBEAT_COOLDOWN_TICK = new HashMap<>();
     // Track which players have the Darkness effect applied by this mod's low-health logic
     private static final Set<UUID> LOW_HEALTH_DARKNESS_OWNER = new HashSet<>();
+    // Heartbeat tuning constants
+    // Interval range in ticks: faster when health is lower
+    private static final int HEARTBEAT_INTERVAL_MIN_TICKS = 10;   // ~0.5s at 20 TPS
+    private static final int HEARTBEAT_INTERVAL_MAX_TICKS = 40;   // ~2.0s at 20 TPS
+    // Volume range: louder when health is lower
+    private static final float HEARTBEAT_VOLUME_MIN = 0.15f;
+    private static final float HEARTBEAT_VOLUME_MAX = 1.0f;
     // Test toggle: when true, requires hardcore mode for death logic; when false, always runs regardless of hardcore.
     public static boolean REQUIRE_HARDCORE_FOR_DEATH_LOGIC = false;
 
@@ -144,11 +151,10 @@ public class ModEvents {
 
         float health = player.getHealth();
         UUID id = player.getUUID();
-        boolean weOwn = LOW_HEALTH_DARKNESS_OWNER.contains(id);
         var existing = player.getEffect(MobEffects.DARKNESS);
 
         // Treat long-duration Darkness as external (e.g., Warden/Sculk). Our effect is ~60t; add buffer.
-        boolean externalDarknessActive = existing != null && (!weOwn || existing.getDuration() > 80);
+        boolean externalDarknessActive = existing != null && (!LOW_HEALTH_DARKNESS_OWNER.contains(id) || existing.getDuration() > 80);
 
         // 4 hearts = 8.0 health
         if (health < 8.0F) {
@@ -163,20 +169,32 @@ public class ModEvents {
             if (existing == null) {
                 player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0, true, false, true));
                 LOW_HEALTH_DARKNESS_OWNER.add(id);
-                weOwn = true;
                 existing = player.getEffect(MobEffects.DARKNESS);
             }
 
             // Refresh only if ours is present and running low
-            if (weOwn && existing != null && existing.getDuration() <= 30) {
+            if (existing != null && existing.getDuration() <= 30) {
                 player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0, true, false, true));
                 existing = player.getEffect(MobEffects.DARKNESS);
             }
 
-            // Heartbeat only when our short Darkness is active
-            if (weOwn && existing != null && existing.getDuration() <= 80) {
+            // Compute dynamic interval based on health (lower health -> faster heartbeat)
+            float clamped = Math.max(0f, Math.min(8f, health));
+            int interval = HEARTBEAT_INTERVAL_MIN_TICKS + (int) ((HEARTBEAT_INTERVAL_MAX_TICKS - HEARTBEAT_INTERVAL_MIN_TICKS) * (clamped / 8f));
+            // Compute dynamic volume based on health (lower health -> louder)
+            float lowFactor = 1.0f - (clamped / 8.0f); // 0 at 4 hearts, 1 near 0 health
+            float volume = HEARTBEAT_VOLUME_MIN + (HEARTBEAT_VOLUME_MAX - HEARTBEAT_VOLUME_MIN) * lowFactor;
+
+            // Heartbeat only when our short Darkness is active; also allow faster reschedule if health dropped
+            if (existing != null && existing.getDuration() <= 80) {
                 int tick = player.tickCount;
                 int nextAllowed = HEARTBEAT_COOLDOWN_TICK.getOrDefault(id, 0);
+                // If health just dropped, pull nextAllowed closer so cadence speeds up immediately
+                int desiredNext = tick + interval;
+                if (nextAllowed > desiredNext) {
+                    nextAllowed = desiredNext;
+                    HEARTBEAT_COOLDOWN_TICK.put(id, nextAllowed);
+                }
                 if (tick >= nextAllowed) {
                     ServerLevel level = player.level();
                     level.playSound(
@@ -184,10 +202,10 @@ public class ModEvents {
                             player.getX(), player.getY(), player.getZ(),
                             SoundEvents.WARDEN_HEARTBEAT,
                             SoundSource.PLAYERS,
-                            0.7f,
+                            volume,
                             1.0f
                     );
-                    HEARTBEAT_COOLDOWN_TICK.put(id, tick + 40);
+                    HEARTBEAT_COOLDOWN_TICK.put(id, tick + interval);
                 }
             }
         } else {
