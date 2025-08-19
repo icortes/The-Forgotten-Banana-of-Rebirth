@@ -6,7 +6,9 @@ import com.omgisa.the_forgotten_banana_of_rebirth.entity.ModEntities;
 import com.omgisa.the_forgotten_banana_of_rebirth.entity.client.TombstoneRenderer;
 import com.omgisa.the_forgotten_banana_of_rebirth.item.ModCreativeModeTabs;
 import com.omgisa.the_forgotten_banana_of_rebirth.item.ModItems;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -18,8 +20,11 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
+
+import java.util.Objects;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(TheForgottenBananaOfRebirth.MOD_ID)
@@ -70,8 +75,17 @@ public class TheForgottenBananaOfRebirth {
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
+
+    }
+
+    @SubscribeEvent
+    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!Objects.requireNonNull(event.getEntity().getServer()).isHardcore()) {
+            event.getEntity().displayClientMessage(
+                    Component.literal("[Warning] This world should be in hardcore mode!")
+                             .withStyle(ChatFormatting.RED),
+                    false);
+        }
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
