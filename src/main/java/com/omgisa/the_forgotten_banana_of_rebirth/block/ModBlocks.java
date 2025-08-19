@@ -12,7 +12,10 @@ public class ModBlocks {
             DeferredRegister.createBlocks(TheForgottenBananaOfRebirth.MOD_ID);
 
     public static final DeferredBlock<Block> TOMBSTONE =
-            BLOCKS.registerBlock("tombstone", (properties) -> new TombstoneBlock(properties.noOcclusion()));
+            BLOCKS.registerBlock("tombstone", (properties) -> new TombstoneBlock(
+                    // Make the tombstone unbreakable and explosion-proof
+                    properties.noOcclusion().strength(-1.0F, 3_600_000.0F)
+            ));
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);
