@@ -2,5 +2,10 @@
   "item.the_forgotten_banana_of_rebirth.banana": "Banana",
   "item.the_forgotten_banana_of_rebirth.banana.tooltip": "Not your average banana. This one has been through a lot.",
 
-  "creativetab.the_forgotten_banana_of_rebirth.banana_items": "Banana Items"
+  "item.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
+
+  "block.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
+
+  "creativetab.the_forgotten_banana_of_rebirth.banana_items": "Banana Items",
+  "creativetab.the_forgotten_banana_of_rebirth.banana_blocks": "Banana Blocks"
 }

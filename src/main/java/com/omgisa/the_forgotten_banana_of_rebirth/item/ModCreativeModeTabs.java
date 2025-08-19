@@ -1,8 +1,10 @@
 package com.omgisa.the_forgotten_banana_of_rebirth.item;
 
 import com.omgisa.the_forgotten_banana_of_rebirth.TheForgottenBananaOfRebirth;
+import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
@@ -19,10 +21,19 @@ public class ModCreativeModeTabs {
                                        () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.BANANA.get()))
                                                             .title(Component.translatable("creativetab.the_forgotten_banana_of_rebirth.banana_items"))
                                                             .displayItems((itemDisplayParameters, output) -> {
-                output.accept(ModItems.BANANA);
-            }).build());
+                                                                output.accept(ModItems.BANANA);
+                                                            }).build());
 
-    public static void register(IEventBus eventBus){
+    public static final Supplier<CreativeModeTab> BANANA_BLOCKS_TAB =
+            CREATIVE_MODE_TAB.register("banana_blocks_tab",
+                                       () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModBlocks.TOMBSTONE.get()))
+                                                            .withTabsBefore(ResourceLocation.fromNamespaceAndPath(TheForgottenBananaOfRebirth.MOD_ID, "banana_items_tab"))
+                                                            .title(Component.translatable("creativetab.the_forgotten_banana_of_rebirth.banana_blocks"))
+                                                            .displayItems((itemDisplayParameters, output) -> {
+                                                                output.accept(ModBlocks.TOMBSTONE);
+                                                            }).build());
+
+    public static void register(IEventBus eventBus) {
         CREATIVE_MODE_TAB.register(eventBus);
     }
 }

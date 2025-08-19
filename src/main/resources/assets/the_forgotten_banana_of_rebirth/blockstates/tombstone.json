@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "facing=north,variant=0": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_1",
+      "y": 180
+    },
+    "facing=south,variant=0": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_1"
+    },
+    "facing=west,variant=0": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_1",
+      "y": 270
+    },
+    "facing=east,variant=0": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_1",
+      "y": 90
+    },
+
+    "facing=north,variant=1": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_2",
+      "y": 180
+    },
+    "facing=south,variant=1": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_2"
+    },
+    "facing=west,variant=1": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_2",
+      "y": 270
+    },
+    "facing=east,variant=1": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_2",
+      "y": 90
+    },
+
+    "facing=north,variant=2": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_3",
+      "y": 180
+    },
+    "facing=south,variant=2": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_3"
+    },
+    "facing=west,variant=2": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_3",
+      "y": 270
+    },
+    "facing=east,variant=2": {
+      "model": "the_forgotten_banana_of_rebirth:block/tombstone_3",
+      "y": 90
+    }
+  }
+}
+
