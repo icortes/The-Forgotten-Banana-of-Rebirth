@@ -40,6 +40,8 @@ public class ModEvents {
     // Volume range: louder when health is lower
     private static final float HEARTBEAT_VOLUME_MIN = 0.15f;
     private static final float HEARTBEAT_VOLUME_MAX = 1.0f;
+    // Minimum health (in health points, not hearts) at or below which low-health effects trigger
+    private static final float LOW_HEALTH_THRESHOLD = 10.0f; // 5 hearts (10 health points)
     // Test toggle: when true, requires hardcore mode for death logic; when false, always runs regardless of hardcore.
     public static boolean REQUIRE_HARDCORE_FOR_DEATH_LOGIC = false;
 
@@ -156,8 +158,8 @@ public class ModEvents {
         // Treat long-duration Darkness as external (e.g., Warden/Sculk). Our effect is ~60t; add buffer.
         boolean externalDarknessActive = existing != null && (!LOW_HEALTH_DARKNESS_OWNER.contains(id) || existing.getDuration() > 80);
 
-        // 4 hearts = 8.0 health
-        if (health < 8.0F) {
+        // Trigger when health is at or below the configured threshold (health points)
+        if (health < LOW_HEALTH_THRESHOLD) {
             if (externalDarknessActive) {
                 // Defer to external effect and stop our ownership/heartbeat to avoid interference
                 LOW_HEALTH_DARKNESS_OWNER.remove(id);
@@ -179,10 +181,11 @@ public class ModEvents {
             }
 
             // Compute dynamic interval based on health (lower health -> faster heartbeat)
-            float clamped = Math.max(0f, Math.min(8f, health));
-            int interval = HEARTBEAT_INTERVAL_MIN_TICKS + (int) ((HEARTBEAT_INTERVAL_MAX_TICKS - HEARTBEAT_INTERVAL_MIN_TICKS) * (clamped / 8f));
+            float denom = Math.max(0.001f, LOW_HEALTH_THRESHOLD);
+            float clamped = Math.max(0f, Math.min(denom, health));
+            int interval = HEARTBEAT_INTERVAL_MIN_TICKS + (int) ((HEARTBEAT_INTERVAL_MAX_TICKS - HEARTBEAT_INTERVAL_MIN_TICKS) * (clamped / denom));
             // Compute dynamic volume based on health (lower health -> louder)
-            float lowFactor = 1.0f - (clamped / 8.0f); // 0 at 4 hearts, 1 near 0 health
+            float lowFactor = 1.0f - (clamped / denom); // 0 at threshold, 1 near 0 health
             float volume = HEARTBEAT_VOLUME_MIN + (HEARTBEAT_VOLUME_MAX - HEARTBEAT_VOLUME_MIN) * lowFactor;
 
             // Heartbeat only when our short Darkness is active; also allow faster reschedule if health dropped
