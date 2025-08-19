@@ -2,6 +2,7 @@ package com.omgisa.the_forgotten_banana_of_rebirth;
 
 import com.mojang.logging.LogUtils;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
+import com.omgisa.the_forgotten_banana_of_rebirth.block.entity.ModBlockEntities;
 import com.omgisa.the_forgotten_banana_of_rebirth.entity.ModEntities;
 import com.omgisa.the_forgotten_banana_of_rebirth.entity.client.TombstoneRenderer;
 import com.omgisa.the_forgotten_banana_of_rebirth.item.ModCreativeModeTabs;
@@ -49,6 +50,7 @@ public class TheForgottenBananaOfRebirth {
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
 
         ModEntities.register(modEventBus);
 

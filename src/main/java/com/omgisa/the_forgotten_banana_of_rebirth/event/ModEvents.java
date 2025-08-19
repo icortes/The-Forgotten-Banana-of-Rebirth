@@ -3,6 +3,7 @@ package com.omgisa.the_forgotten_banana_of_rebirth.event;
 import com.omgisa.the_forgotten_banana_of_rebirth.TheForgottenBananaOfRebirth;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.custom.TombstoneBlock;
+import com.omgisa.the_forgotten_banana_of_rebirth.block.entity.TombstoneBlockEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -13,6 +14,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
@@ -107,6 +110,16 @@ public class ModEvents {
                                                   .setValue(TombstoneBlock.VARIANT, variant);
         level.setBlockAndUpdate(placePos, tombstoneState);
 
+        // Only transfer inventory when keepInventory gamerule is false to avoid duplication on respawn
+        boolean keepInv = level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+        if (!keepInv) {
+            BlockEntity be = level.getBlockEntity(placePos);
+            if (be instanceof TombstoneBlockEntity tombstoneBE) {
+                tombstoneBE.setOwner(player);
+                tombstoneBE.depositFrom(player.getInventory());
+            }
+        }
+
         // 2) Ensure the deaths scoreboard objective exists (DEATH_COUNT automatically increments)
         Scoreboard scoreboard = level.getScoreboard();
         String deathsObjective = "deaths";
@@ -124,7 +137,6 @@ public class ModEvents {
             scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, objective);
             scoreboard.setDisplayObjective(DisplaySlot.BELOW_NAME, objective);
         }
-        // Note: DEATH_COUNT objectives increment automatically; do not modify manually to avoid double counting.
 
         // 3) Remove one heart (2 health) from player's max health, clamped to minimum of 1 heart (2.0)
         var maxHealthAttr = player.getAttribute(Attributes.MAX_HEALTH);
