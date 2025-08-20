@@ -69,7 +69,8 @@ public class TombstoneBlockEntity extends RandomizableContainerBlockEntity imple
         return uuid.map(u -> u.equals(player.getUUID())).orElse(false);
     }
 
-    private Optional<UUID> getOwnerUuid() {
+    // Made public so blocks or other systems can identify the owner of this tombstone
+    public Optional<UUID> getOwnerUuid() {
         ItemStack marker = items.get(META_SLOT);
         if (marker.isEmpty())
             return Optional.empty();
