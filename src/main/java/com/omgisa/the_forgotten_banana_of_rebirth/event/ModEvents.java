@@ -12,11 +12,18 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
+import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -31,6 +38,8 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -306,5 +315,31 @@ public class ModEvents {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
         }
+    }
+
+    @SubscribeEvent
+    public static void onVillagerTrades(VillagerTradesEvent event) {
+        if (event.getType() != VillagerProfession.FARMER)
+            return;
+
+        // Novice level (1) trade: Farmer sells 1 Banana for 16-23 emeralds, single use, high XP
+        var trades = event.getTrades();
+        List<VillagerTrades.ItemListing> level1 = trades.computeIfAbsent(1, k -> new ArrayList<>());
+        level1.add(new VillagerTrades.ItemListing() {
+            @Override
+            public MerchantOffer getOffer(@NotNull Entity entity, @NotNull RandomSource random) {
+                // 50% chance to appear
+                if (random.nextFloat() >= 0.50f)
+                    return null;
+
+                int emeraldCost = 16 + random.nextInt(8); // 16-23 emeralds
+                ItemCost price = new ItemCost(Items.EMERALD, emeraldCost);
+                ItemStack result = new ItemStack(ModItems.BANANA.get(), 1);
+                int maxUses = 1; // very limited supply
+                int xp = 30;     // generous experience to signify rarity
+                float priceMultiplier = 0.05f;
+                return new MerchantOffer(price, result, maxUses, xp, priceMultiplier);
+            }
+        });
     }
 }
