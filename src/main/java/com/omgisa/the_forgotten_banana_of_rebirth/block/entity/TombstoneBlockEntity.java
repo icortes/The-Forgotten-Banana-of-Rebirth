@@ -44,12 +44,7 @@ public class TombstoneBlockEntity extends RandomizableContainerBlockEntity imple
     public void depositFrom(@NotNull Player player) {
         // Set owner marker before storing items
         setOwnerMarker(player);
-        deposit(player.getInventory(), true);
-    }
-
-    public void depositCopyOf(@NotNull Inventory inv, @NotNull Player owner) {
-        setOwnerMarker(owner);
-        deposit(inv, false);
+        deposit(player.getInventory());
     }
 
     private void setOwnerMarker(@NotNull Player player) {
@@ -88,7 +83,7 @@ public class TombstoneBlockEntity extends RandomizableContainerBlockEntity imple
         }
     }
 
-    private void deposit(@NotNull Inventory inv, boolean move) {
+    private void deposit(@NotNull Inventory inv) {
         Level lvl = this.getLevel();
         if (!(lvl instanceof ServerLevel))
             return;
@@ -113,9 +108,8 @@ public class TombstoneBlockEntity extends RandomizableContainerBlockEntity imple
             if (!placed) {
                 overflow.addItem(toStore);
             }
-            if (move) {
-                inv.setItem(i, ItemStack.EMPTY);
-            }
+            // Always move items out of the player's inventory during deposit
+            inv.setItem(i, ItemStack.EMPTY);
         }
         // Drop any overflow
         if (!overflow.isEmpty()) {
@@ -147,8 +141,9 @@ public class TombstoneBlockEntity extends RandomizableContainerBlockEntity imple
 
     @Override
     public void clearContent() {
-        for (int i = 0; i < items.size(); i++)
+        for (int i = 0; i < items.size(); i++) {
             items.set(i, ItemStack.EMPTY);
+        }
     }
 
     // Container implementation

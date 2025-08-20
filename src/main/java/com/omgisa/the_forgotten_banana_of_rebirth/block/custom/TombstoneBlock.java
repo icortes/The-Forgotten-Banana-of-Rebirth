@@ -2,18 +2,13 @@ package com.omgisa.the_forgotten_banana_of_rebirth.block.custom;
 
 import com.mojang.serialization.MapCodec;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.entity.TombstoneBlockEntity;
-import com.omgisa.the_forgotten_banana_of_rebirth.item.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -30,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
-import java.util.UUID;
 
 public class TombstoneBlock extends HorizontalDirectionalBlock implements EntityBlock {
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
@@ -80,7 +74,7 @@ public class TombstoneBlock extends HorizontalDirectionalBlock implements Entity
             return InteractionResult.SUCCESS;
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof TombstoneBlockEntity tombstone) {
-            boolean allowed = player.isCreative() || tombstone.isOwner(player);
+            boolean allowed = tombstone.isOwner(player); // only the owner may retrieve
             if (!allowed)
                 return InteractionResult.PASS;
             tombstone.dropAll(level, pos);
@@ -93,51 +87,20 @@ public class TombstoneBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     protected @NotNull InteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
-        // Only act on server, with a banana, and when the clicker is NOT the owner
         if (level.isClientSide)
             return InteractionResult.SUCCESS;
-        if (stack.isEmpty() || stack.getItem() != ModItems.BANANA.get())
-            return InteractionResult.PASS;
 
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof TombstoneBlockEntity tombstone))
             return InteractionResult.PASS;
 
-        if (tombstone.isOwner(player))
-            return InteractionResult.PASS; // owner uses default behavior
-
-        // Non-owner with banana: try to revive the owner
-        if (!(level instanceof ServerLevel serverLevel))
-            return InteractionResult.PASS;
-        var server = serverLevel.getServer();
-        var optOwner = tombstone.getOwnerUuid();
-        if (optOwner.isEmpty())
-            return InteractionResult.CONSUME; // nothing to do, consume to avoid spam
-        UUID ownerId = optOwner.get();
-        ServerPlayer owner = server.getPlayerList().getPlayer(ownerId);
-        if (owner == null) {
-            // Owner not online; do nothing but consume to prevent repeated attempts
+        // Owner can retrieve items regardless of held item
+        if (tombstone.isOwner(player)) {
+            tombstone.dropAll(level, pos);
+            level.removeBlock(pos, false);
             return InteractionResult.CONSUME;
         }
 
-        // If owner is dead or in spectator, force proper respawn to bed/world spawn
-        if (!owner.isAlive() || owner.isSpectator()) {
-            ServerPlayer respawned = server.getPlayerList().respawn(owner, false, Entity.RemovalReason.KILLED);
-            respawned.setGameMode(GameType.SURVIVAL);
-            float targetHealth = Math.max(8.0f, respawned.getHealth());
-            respawned.setHealth(targetHealth);
-        } else {
-            // Otherwise just ensure Survival and minimum health
-            owner.setGameMode(GameType.SURVIVAL);
-            float targetHealth = Math.max(8.0f, owner.getHealth());
-            owner.setHealth(targetHealth);
-        }
-
-        // Consume one banana from the user unless creative
-        if (!player.isCreative()) {
-            stack.shrink(1);
-        }
-
-        return InteractionResult.SUCCESS;
+        return InteractionResult.PASS;
     }
 }

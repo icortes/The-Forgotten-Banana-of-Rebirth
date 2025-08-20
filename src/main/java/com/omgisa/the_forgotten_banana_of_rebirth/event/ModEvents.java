@@ -4,6 +4,7 @@ import com.omgisa.the_forgotten_banana_of_rebirth.TheForgottenBananaOfRebirth;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.custom.TombstoneBlock;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.entity.TombstoneBlockEntity;
+import com.omgisa.the_forgotten_banana_of_rebirth.item.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -11,10 +12,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.scores.DisplaySlot;
@@ -25,6 +29,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.*;
@@ -44,9 +49,9 @@ public class ModEvents {
     private static final float HEARTBEAT_VOLUME_MIN = 0.15f;
     private static final float HEARTBEAT_VOLUME_MAX = 1.0f;
     // Minimum health (in health points, not hearts) at or below which low-health effects trigger
-    private static final float LOW_HEALTH_THRESHOLD = 10.0f; // 5 hearts (10 health points)
+    private static final float LOW_HEALTH_THRESHOLD = 8.0f; // 4 hearts
     // Test toggle: when true, requires hardcore mode for death logic; when false, always runs regardless of hardcore.
-    public static boolean REQUIRE_HARDCORE_FOR_DEATH_LOGIC = false;
+    public static boolean REQUIRE_HARDCORE_FOR_DEATH_LOGIC = true;
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -226,6 +231,80 @@ public class ModEvents {
             // Recovered: stop owning without force-removing the Darkness effect
             LOW_HEALTH_DARKNESS_OWNER.remove(id);
             HEARTBEAT_COOLDOWN_TICK.remove(id);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRightClicksTombstoneWithBanana(PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer clicker))
+            return;
+        ServerLevel level = (ServerLevel) event.getLevel();
+        if (level.isClientSide)
+            return;
+
+        ItemStack held = event.getItemStack();
+        if (held.isEmpty() || held.getItem() != ModItems.BANANA.get())
+            return;
+
+        BlockPos pos = event.getPos();
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof TombstoneBlockEntity tombstone))
+            return;
+
+        Optional<UUID> ownerIdOpt = tombstone.getOwnerUuid();
+        if (ownerIdOpt.isEmpty()) {
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
+        }
+
+        UUID ownerId = ownerIdOpt.get();
+        ServerPlayer owner = level.getServer().getPlayerList().getPlayer(ownerId);
+        if (owner == null) {
+            // Owner offline; consume the interaction without effect to prevent spam
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
+        }
+
+        // Only revive when the owner is currently in spectator mode; do not teleport
+        if (owner.isSpectator()) {
+            var server = level.getServer();
+            var source = server.createCommandSourceStack().withPermission(4);
+            // Set Survival using the server command system for authoritative sync
+            server.getCommands().performPrefixedCommand(source, "gamemode survival " + owner.getGameProfile().getName());
+            // Also set directly server-side as a safeguard
+            owner.setGameMode(GameType.SURVIVAL);
+
+            // Notify via chat
+            owner.sendSystemMessage(Component.literal("You have been revived and set to Survival."));
+            clicker.sendSystemMessage(Component.literal("You revived " + owner.getGameProfile().getName() + " with a Banana."));
+
+            // Ensure clean state and sync abilities; no teleporting
+            owner.setCamera(owner);
+            owner.stopRiding();
+            owner.stopUsingItem();
+            owner.setNoGravity(false);
+            owner.setInvulnerable(false);
+            owner.setInvisible(false);
+            owner.setDeltaMovement(0, 0, 0);
+            owner.setSprinting(false);
+            owner.setShiftKeyDown(false);
+            owner.refreshDimensions();
+            owner.onUpdateAbilities();
+
+            // Ensure they have some health to avoid immediate death
+            float targetHealth = Math.max(8.0f, owner.getHealth());
+            owner.setHealth(targetHealth);
+
+            // Consume one banana unless the clicker is in creative
+            if (!clicker.isCreative()) {
+                held.shrink(1);
+            }
+
+            // Consume the interaction
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
         }
     }
 }

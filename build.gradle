@@ -165,3 +165,9 @@ idea {
         downloadJavadoc = true
     }
 }
+
+// Name the primary jar as 'modid-project_version-neoforge-minecraft_version.jar'
+
+tasks.named('jar', Jar).configure {
+    archiveFileName.set("${project.mod_id}-${project.version}-neoforge-${project.minecraft_version}.jar")
+}
