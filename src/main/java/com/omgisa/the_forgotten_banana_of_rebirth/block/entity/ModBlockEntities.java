@@ -17,7 +17,7 @@ public class ModBlockEntities {
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }    public static final Supplier<BlockEntityType<TombstoneBlockEntity>> TOMBSTONE_BE =
-            BLOCK_ENTITIES.register("tombstone", () -> new BlockEntityType<>(TombstoneBlockEntity::new, Set.of(ModBlocks.TOMBSTONE.get()), false));
+            BLOCK_ENTITIES.register("tombstone", () -> new BlockEntityType<>(TombstoneBlockEntity::new, Set.of(ModBlocks.TOMBSTONE.get()), true));
 
 
 }

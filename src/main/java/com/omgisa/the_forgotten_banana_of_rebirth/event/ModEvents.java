@@ -115,8 +115,7 @@ public class ModEvents {
         if (!keepInv) {
             BlockEntity be = level.getBlockEntity(placePos);
             if (be instanceof TombstoneBlockEntity tombstoneBE) {
-                tombstoneBE.setOwner(player);
-                tombstoneBE.depositFrom(player.getInventory());
+                tombstoneBE.depositFrom(player);
             }
         }
 

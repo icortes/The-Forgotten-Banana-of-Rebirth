@@ -72,14 +72,13 @@ public class TombstoneBlock extends HorizontalDirectionalBlock implements Entity
             return InteractionResult.SUCCESS;
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof TombstoneBlockEntity tombstone) {
-            boolean allowed = tombstone.isOwner(player) || player.isCreative();
-            if (allowed) {
-                tombstone.dropAll(level, pos);
-                // Remove the tombstone after retrieval
-                level.removeBlock(pos, false);
-                return InteractionResult.CONSUME;
-            }
-            return InteractionResult.PASS;
+            boolean allowed = player.isCreative() || tombstone.isOwner(player);
+            if (!allowed)
+                return InteractionResult.PASS;
+            tombstone.dropAll(level, pos);
+            // Remove the tombstone after retrieval
+            level.removeBlock(pos, false);
+            return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
     }
