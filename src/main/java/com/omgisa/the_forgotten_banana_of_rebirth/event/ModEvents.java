@@ -58,7 +58,9 @@ public class ModEvents {
     private static final float HEARTBEAT_VOLUME_MIN = 0.15f;
     private static final float HEARTBEAT_VOLUME_MAX = 1.0f;
     // Minimum health (in health points, not hearts) at or below which low-health effects trigger
-    private static final float LOW_HEALTH_THRESHOLD = 8.0f; // 4 hearts
+    private static final float LOW_HEALTH_THRESHOLD = 6.0f; // 3 hearts
+    // Minimum remaining max health in hearts; player max health will not drop below this value
+    private static final double MIN_MAX_HEALTH_HEARTS = 5.0; // 5 hearts => 10.0 health points
     // Test toggle: when true, requires hardcore mode for death logic; when false, always runs regardless of hardcore.
     public static boolean REQUIRE_HARDCORE_FOR_DEATH_LOGIC = true;
 
@@ -151,10 +153,11 @@ public class ModEvents {
             scoreboard.setDisplayObjective(DisplaySlot.BELOW_NAME, objective);
         }
 
-        // 3) Remove one heart (2 health) from player's max health, clamped to minimum of 1 heart (2.0)
+        // 3) Remove one heart (2 health) from player's max health, clamped to minimum of configured hearts
         var maxHealthAttr = player.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
-            double newBase = Math.max(2.0, maxHealthAttr.getBaseValue() - 2.0);
+            double minHealthPoints = MIN_MAX_HEALTH_HEARTS * 2.0; // convert hearts to health points
+            double newBase = Math.max(minHealthPoints, maxHealthAttr.getBaseValue() - 2.0);
             maxHealthAttr.setBaseValue(newBase);
         }
     }
