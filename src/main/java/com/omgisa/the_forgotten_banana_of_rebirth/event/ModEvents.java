@@ -12,11 +12,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -39,7 +37,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.village.VillagerTradesEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -104,8 +101,16 @@ public class ModEvents {
         HEARTBEAT_COOLDOWN_TICK.remove(id);
         LOW_HEALTH_DARKNESS_OWNER.remove(id);
 
-        // Server only and optional hardcore mode check (controlled by REQUIRE_HARDCORE_FOR_DEATH_LOGIC)
+        // Broadcast death coordinates to all players
         var server = player.getServer();
+        if (server != null) {
+            BlockPos deathPos = player.blockPosition();
+            Component msg = Component.literal(player.getGameProfile().getName() + " died at "
+                                                      + deathPos.getX() + ", " + deathPos.getY() + ", " + deathPos.getZ());
+            server.getPlayerList().broadcastSystemMessage(msg, false);
+        }
+
+        // Server only and optional hardcore mode check (controlled by REQUIRE_HARDCORE_FOR_DEATH_LOGIC)
         if (server == null || (REQUIRE_HARDCORE_FOR_DEATH_LOGIC && !server.isHardcore()))
             return;
 
@@ -309,10 +314,8 @@ public class ModEvents {
             float targetHealth = Math.max(8.0f, owner.getHealth());
             owner.setHealth(targetHealth);
 
-            // Consume one banana unless the clicker is in creative
-            if (!clicker.isCreative()) {
-                held.shrink(1);
-            }
+            // Consume one banana from the used stack
+            held.shrink(1);
 
             // Consume the interaction
             event.setCanceled(true);
@@ -328,21 +331,18 @@ public class ModEvents {
         // Novice level (1) trade: Farmer sells 1 Banana for 16-23 emeralds, single use, high XP
         var trades = event.getTrades();
         List<VillagerTrades.ItemListing> level1 = trades.computeIfAbsent(1, k -> new ArrayList<>());
-        level1.add(new VillagerTrades.ItemListing() {
-            @Override
-            public MerchantOffer getOffer(@NotNull Entity entity, @NotNull RandomSource random) {
-                // 50% chance to appear
-                if (random.nextFloat() >= 0.50f)
-                    return null;
+        level1.add((entity, random) -> {
+            // 50% chance to appear
+            if (random.nextFloat() >= 0.50f)
+                return null;
 
-                int emeraldCost = 16 + random.nextInt(8); // 16-23 emeralds
-                ItemCost price = new ItemCost(Items.EMERALD, emeraldCost);
-                ItemStack result = new ItemStack(ModItems.BANANA.get(), 1);
-                int maxUses = 1; // very limited supply
-                int xp = 30;     // generous experience to signify rarity
-                float priceMultiplier = 0.05f;
-                return new MerchantOffer(price, result, maxUses, xp, priceMultiplier);
-            }
+            int emeraldCost = 16 + random.nextInt(8); // 16-23 emeralds
+            ItemCost price = new ItemCost(Items.EMERALD, emeraldCost);
+            ItemStack result = new ItemStack(ModItems.BANANA.get(), 1);
+            int maxUses = 1; // very limited supply
+            int xp = 30;     // generous experience to signify rarity
+            float priceMultiplier = 0.05f;
+            return new MerchantOffer(price, result, maxUses, xp, priceMultiplier);
         });
     }
 }
