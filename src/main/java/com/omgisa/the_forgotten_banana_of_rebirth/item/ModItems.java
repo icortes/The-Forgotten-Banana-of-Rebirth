@@ -3,6 +3,7 @@ package com.omgisa.the_forgotten_banana_of_rebirth.item;
 import com.omgisa.the_forgotten_banana_of_rebirth.TheForgottenBananaOfRebirth;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
 import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.BananaItem;
+import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.DiamondBananaItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -13,6 +14,7 @@ public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(TheForgottenBananaOfRebirth.MOD_ID);
 
     public static final DeferredItem<Item> BANANA = ITEMS.registerItem("banana", (properties) -> new BananaItem(properties.food(ModFoodProperties.BANANA)));
+    public static final DeferredItem<Item> DIAMOND_BANANA = ITEMS.registerItem("diamond_banana", (properties) -> new DiamondBananaItem(properties));
     public static final DeferredItem<Item> TOMBSTONE = ITEMS.registerItem("tombstone", (properties) -> new BlockItem(ModBlocks.TOMBSTONE.get(), properties));
 
     public static void register(IEventBus eventBus) {

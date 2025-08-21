@@ -5,6 +5,7 @@ import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.custom.TombstoneBlock;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.entity.TombstoneBlockEntity;
 import com.omgisa.the_forgotten_banana_of_rebirth.item.ModItems;
+import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.BananaItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -260,7 +261,10 @@ public class ModEvents {
             return;
 
         ItemStack held = event.getItemStack();
-        if (held.isEmpty() || held.getItem() != ModItems.BANANA.get())
+        if (held.isEmpty())
+            return;
+
+        if (!(held.getItem() instanceof BananaItem bananaItem))
             return;
 
         BlockPos pos = event.getPos();
@@ -278,49 +282,62 @@ public class ModEvents {
         UUID ownerId = ownerIdOpt.get();
         ServerPlayer owner = level.getServer().getPlayerList().getPlayer(ownerId);
         if (owner == null) {
-            // Owner offline; consume the interaction without effect to prevent spam
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
             return;
         }
 
-        // Only revive when the owner is currently in spectator mode; do not teleport
-        if (owner.isSpectator()) {
-            var server = level.getServer();
-            var source = server.createCommandSourceStack().withPermission(4);
-            // Set Survival using the server command system for authoritative sync
-            server.getCommands().performPrefixedCommand(source, "gamemode survival " + owner.getGameProfile().getName());
-            // Also set directly server-side as a safeguard
-            owner.setGameMode(GameType.SURVIVAL);
-
-            // Notify via chat
-            owner.sendSystemMessage(Component.literal("You have been revived and set to Survival."));
-            clicker.sendSystemMessage(Component.literal("You revived " + owner.getGameProfile().getName() + " with a Banana."));
-
-            // Ensure clean state and sync abilities; no teleporting
-            owner.setCamera(owner);
-            owner.stopRiding();
-            owner.stopUsingItem();
-            owner.setNoGravity(false);
-            owner.setInvulnerable(false);
-            owner.setInvisible(false);
-            owner.setDeltaMovement(0, 0, 0);
-            owner.setSprinting(false);
-            owner.setShiftKeyDown(false);
-            owner.refreshDimensions();
-            owner.onUpdateAbilities();
-
-            // Ensure they have some health to avoid immediate death
-            float targetHealth = Math.max(8.0f, owner.getHealth());
-            owner.setHealth(targetHealth);
-
-            // Consume one banana from the used stack
-            held.shrink(1);
-
-            // Consume the interaction
+        if (!owner.isSpectator()) {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
         }
+
+        Scoreboard scoreboard = level.getScoreboard();
+        Objective objective = scoreboard.getObjective("deaths");
+        if (objective == null) {
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
+        }
+        int deaths = scoreboard.getOrCreatePlayerScore(owner, objective).get();
+
+        if (!bananaItem.canRevive(clicker, owner, deaths)) {
+            int required = bananaItem.getRequiredDeaths();
+            clicker.sendSystemMessage(Component.literal("This item only works when the dead player has exactly " + required + " death" + (required == 1 ? "" : "s") + "."));
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
+        }
+
+        var server = level.getServer();
+        var source = server.createCommandSourceStack().withPermission(4);
+        server.getCommands().performPrefixedCommand(source, "gamemode survival " + owner.getGameProfile().getName());
+        owner.setGameMode(GameType.SURVIVAL);
+
+        owner.sendSystemMessage(Component.literal("You have been revived and set to Survival."));
+        String itemName = held.getHoverName().getString();
+        clicker.sendSystemMessage(Component.literal("You revived " + owner.getGameProfile().getName() + " with a " + itemName + "."));
+
+        owner.setCamera(owner);
+        owner.stopRiding();
+        owner.stopUsingItem();
+        owner.setNoGravity(false);
+        owner.setInvulnerable(false);
+        owner.setInvisible(false);
+        owner.setDeltaMovement(0, 0, 0);
+        owner.setSprinting(false);
+        owner.setShiftKeyDown(false);
+        owner.refreshDimensions();
+        owner.onUpdateAbilities();
+
+        float targetHealth = Math.max(8.0f, owner.getHealth());
+        owner.setHealth(targetHealth);
+
+        held.shrink(1);
+
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.SUCCESS);
     }
 
     @SubscribeEvent

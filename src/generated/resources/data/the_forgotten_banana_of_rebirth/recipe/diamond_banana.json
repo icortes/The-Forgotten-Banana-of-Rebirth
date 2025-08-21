@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "the_forgotten_banana_of_rebirth:banana",
+    "D": "minecraft:diamond_block"
+  },
+  "pattern": [
+    "DDD",
+    "DBD",
+    "DDD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "the_forgotten_banana_of_rebirth:diamond_banana"
+  }
+}
