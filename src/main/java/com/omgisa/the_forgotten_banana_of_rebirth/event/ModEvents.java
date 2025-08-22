@@ -303,8 +303,7 @@ public class ModEvents {
         int deaths = scoreboard.getOrCreatePlayerScore(owner, objective).get();
 
         if (!bananaItem.canRevive(clicker, owner, deaths)) {
-            int required = bananaItem.getRequiredDeaths();
-            clicker.sendSystemMessage(Component.literal("This item only works when the dead player has exactly " + required + " death" + (required == 1 ? "" : "s") + "."));
+            clicker.sendSystemMessage(bananaItem.getRestrictionMessage(deaths));
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
             return;

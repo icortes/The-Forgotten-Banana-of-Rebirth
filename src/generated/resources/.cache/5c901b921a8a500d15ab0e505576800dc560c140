@@ -1,6 +1,8 @@
-// 1.21.8	2025-08-21T10:56:43.2330631	Model Definitions - the_forgotten_banana_of_rebirth
+// 1.21.8	2025-08-22T11:54:14.1866455	Model Definitions - the_forgotten_banana_of_rebirth
 b03116986850b076594fa71a7ea83af92e675bd6 assets/the_forgotten_banana_of_rebirth/items/banana.json
 5de884cb56f7fee0a47c4bfa61aac836fa7169e0 assets/the_forgotten_banana_of_rebirth/items/diamond_banana.json
+880af4838b9a022180b34b44319731185ba0538d assets/the_forgotten_banana_of_rebirth/items/hardened_diamond_banana.json
 3b39d899a342073178367f6738ed6eb8d57b1758 assets/the_forgotten_banana_of_rebirth/items/tombstone.json
 b76d76641d5b3b2ecb911b53426b30593655585e assets/the_forgotten_banana_of_rebirth/models/item/banana.json
 654b0fae00f8412ef30e1d8e8f7bbe47d1b63307 assets/the_forgotten_banana_of_rebirth/models/item/diamond_banana.json
+3957a4d04be361feee3cf53eec3b49afc9c85aca assets/the_forgotten_banana_of_rebirth/models/item/hardened_diamond_banana.json

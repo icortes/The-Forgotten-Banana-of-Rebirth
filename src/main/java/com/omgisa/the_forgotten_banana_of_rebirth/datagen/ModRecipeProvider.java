@@ -22,12 +22,21 @@ public class ModRecipeProvider extends RecipeProvider {
     protected void buildRecipes() {
         var items = this.registries.lookupOrThrow(Registries.ITEM);
         ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, ModItems.DIAMOND_BANANA.get())
-                           .define('D', Items.DIAMOND_BLOCK)
+                           .define('D', Items.DIAMOND)
                            .define('B', ModItems.BANANA.get())
                            .pattern("DDD")
                            .pattern("DBD")
                            .pattern("DDD")
                            .unlockedBy(getHasName(ModItems.BANANA.get()), has(ModItems.BANANA.get()))
+                           .save(this.output);
+
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, ModItems.HARDENED_DIAMOND_BANANA.get())
+                           .define('D', Items.DIAMOND_BLOCK)
+                           .define('B', ModItems.DIAMOND_BANANA.get())
+                           .pattern("DDD")
+                           .pattern("DBD")
+                           .pattern("DDD")
+                           .unlockedBy(getHasName(ModItems.DIAMOND_BANANA.get()), has(ModItems.DIAMOND_BANANA.get()))
                            .save(this.output);
     }
 

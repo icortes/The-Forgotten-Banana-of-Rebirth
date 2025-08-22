@@ -32,6 +32,15 @@ public class BananaItem extends Item {
         return deaths == getRequiredDeaths();
     }
 
+    /**
+     * Message shown to the clicker when the banana cannot be used due to death-count restrictions.
+     * Subclasses may override to better describe custom rules.
+     */
+    public Component getRestrictionMessage(int currentDeaths) {
+        int required = getRequiredDeaths();
+        return Component.literal("This item only works when the dead player has exactly " + required + " death" + (required == 1 ? "" : "s") + ".");
+    }
+
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull TooltipDisplay display, Consumer<Component> tooltip, @NotNull TooltipFlag flag) {
         tooltip.accept(Component.translatable("item.the_forgotten_banana_of_rebirth.banana.tooltip"));

@@ -23,6 +23,7 @@ public class ModModelProvider extends ModelProvider {
     protected void registerModels(@NotNull BlockModelGenerators blockModels, @NotNull ItemModelGenerators itemModels) {
         itemModels.generateFlatItem(ModItems.BANANA.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ModItems.DIAMOND_BANANA.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ModItems.HARDENED_DIAMOND_BANANA.get(), ModelTemplates.FLAT_ITEM);
     }
 
     @Override

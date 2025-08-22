@@ -5,6 +5,9 @@
   "item.the_forgotten_banana_of_rebirth.diamond_banana": "Diamond Banana",
   "item.the_forgotten_banana_of_rebirth.diamond_banana.tooltip": "An opulent relic. Revives only those who died twice.",
 
+  "item.the_forgotten_banana_of_rebirth.hardened_diamond_banana": "Hardened Diamond Banana",
+  "item.the_forgotten_banana_of_rebirth.hardened_diamond_banana.tooltip": "Forged under pressure. Revives only those who died three times.",
+
   "item.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
 
   "block.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
