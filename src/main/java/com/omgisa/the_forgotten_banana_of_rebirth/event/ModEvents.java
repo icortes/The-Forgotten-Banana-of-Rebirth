@@ -85,11 +85,10 @@ public class ModEvents {
         if (scoreAccess.get() == 0) {
             scoreAccess.set(0);
         }
-        // Set the deaths objective as the display for all players in the sidebar
-        scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, objective);
-
-        // Set the deaths objective as the display below the name
+        // Hide sidebar, show deaths under names and in TAB list
+        scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, null);
         scoreboard.setDisplayObjective(DisplaySlot.BELOW_NAME, objective);
+        scoreboard.setDisplayObjective(DisplaySlot.LIST, objective);
     }
 
     @SubscribeEvent
@@ -154,10 +153,11 @@ public class ModEvents {
                     true,
                     null
             );
-            // Make sure it's visible like on join
-            scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, objective);
-            scoreboard.setDisplayObjective(DisplaySlot.BELOW_NAME, objective);
         }
+        // Display deaths under names and in TAB list; keep sidebar hidden
+        scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, null);
+        scoreboard.setDisplayObjective(DisplaySlot.BELOW_NAME, objective);
+        scoreboard.setDisplayObjective(DisplaySlot.LIST, objective);
 
         // 3) Remove one heart (2 health) from player's max health, clamped to minimum of configured hearts
         var maxHealthAttr = player.getAttribute(Attributes.MAX_HEALTH);
