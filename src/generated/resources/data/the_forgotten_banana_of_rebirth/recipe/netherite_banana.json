@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "the_forgotten_banana_of_rebirth:hardened_diamond_banana",
+    "G": "minecraft:gold_block",
+    "N": "minecraft:netherite_ingot"
+  },
+  "pattern": [
+    "NGN",
+    "GBG",
+    "NGN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "the_forgotten_banana_of_rebirth:netherite_banana"
+  }
+}

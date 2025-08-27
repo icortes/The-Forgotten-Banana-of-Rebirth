@@ -38,6 +38,16 @@ public class ModRecipeProvider extends RecipeProvider {
                            .pattern("DDD")
                            .unlockedBy(getHasName(ModItems.DIAMOND_BANANA.get()), has(ModItems.DIAMOND_BANANA.get()))
                            .save(this.output);
+
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, ModItems.NETHERITE_BANANA.get())
+                           .define('N', Items.NETHERITE_INGOT)
+                           .define('G', Items.GOLD_BLOCK)
+                           .define('B', ModItems.HARDENED_DIAMOND_BANANA.get())
+                           .pattern("NGN")
+                           .pattern("GBG")
+                           .pattern("NGN")
+                           .unlockedBy(getHasName(Items.NETHERITE_INGOT), has(Items.NETHERITE_INGOT))
+                           .save(this.output);
     }
 
     public static class Runner extends RecipeProvider.Runner {

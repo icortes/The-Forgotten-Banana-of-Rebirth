@@ -8,6 +8,9 @@
   "item.the_forgotten_banana_of_rebirth.hardened_diamond_banana": "Hardened Diamond Banana",
   "item.the_forgotten_banana_of_rebirth.hardened_diamond_banana.tooltip": "Forged under pressure. Revives only those who died three times.",
 
+  "item.the_forgotten_banana_of_rebirth.netherite_banana": "Netherite Banana",
+  "item.the_forgotten_banana_of_rebirth.netherite_banana.tooltip": "Unbreakable resolve. Revives only those who died four times.",
+
   "item.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
 
   "block.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
