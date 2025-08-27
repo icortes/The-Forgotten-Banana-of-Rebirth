@@ -8,7 +8,12 @@ import com.omgisa.the_forgotten_banana_of_rebirth.item.ModItems;
 import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.BananaItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -25,6 +30,7 @@ import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.scores.DisplaySlot;
@@ -105,8 +111,46 @@ public class ModEvents {
         var server = player.getServer();
         if (server != null) {
             BlockPos deathPos = player.blockPosition();
-            Component msg = Component.literal(player.getGameProfile().getName() + " died at "
-                                                      + deathPos.getX() + ", " + deathPos.getY() + ", " + deathPos.getZ());
+            ResourceKey<Level> dimKey = player.level().dimension();
+            ResourceLocation dimLoc = dimKey.location();
+            String dimId = dimLoc.toString();
+            String friendlyDim;
+            if (dimKey == Level.OVERWORLD)
+                friendlyDim = "Overworld";
+            else if (dimKey == Level.NETHER)
+                friendlyDim = "Nether";
+            else if (dimKey == Level.END)
+                friendlyDim = "End";
+            else
+                friendlyDim = dimLoc.getNamespace() + ":" + dimLoc.getPath();
+
+            int x = deathPos.getX();
+            int y = deathPos.getY();
+            int z = deathPos.getZ();
+
+            // Base message
+            MutableComponent base = Component.literal(player.getGameProfile().getName())
+                                             .withStyle(ChatFormatting.GOLD)
+                                             .append(Component.literal(" died at ").withStyle(ChatFormatting.GRAY))
+                                             .append(Component.literal(x + ", " + y + ", " + z).withStyle(ChatFormatting.WHITE))
+                                             .append(Component.literal(" in ").withStyle(ChatFormatting.GRAY))
+                                             .append(Component.literal(friendlyDim).withStyle(ChatFormatting.AQUA));
+
+            // Clickable helpers
+            MutableComponent copyCoords = Component.literal(" [Copy]")
+                                                   .withStyle(style -> style.withColor(ChatFormatting.YELLOW)
+                                                                            .withUnderlined(true)
+                                                                            .withClickEvent(new ClickEvent.CopyToClipboard(x + " " + y + " " + z))
+                                                                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy coordinates to clipboard"))));
+
+            String suggestTpCmd = "execute in " + dimId + " run tp @s " + x + " " + y + " " + z;
+            MutableComponent suggestTp = Component.literal(" [Suggest TP]")
+                                                  .withStyle(style -> style.withColor(ChatFormatting.GREEN)
+                                                                           .withUnderlined(true)
+                                                                           .withClickEvent(new ClickEvent.SuggestCommand(suggestTpCmd))
+                                                                           .withHoverEvent(new HoverEvent.ShowText(Component.literal("Suggest /tp to this location (requires permission)"))));
+
+            MutableComponent msg = base.append(copyCoords).append(suggestTp);
             server.getPlayerList().broadcastSystemMessage(msg, false);
         }
 
