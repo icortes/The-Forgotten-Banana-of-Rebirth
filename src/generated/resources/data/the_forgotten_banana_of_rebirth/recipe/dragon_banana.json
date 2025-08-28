@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "the_forgotten_banana_of_rebirth:netherite_banana",
+    "E": "minecraft:dragon_egg",
+    "H": "minecraft:dragon_head",
+    "P": "minecraft:purpur_block"
+  },
+  "pattern": [
+    "PHP",
+    "PBP",
+    "PEP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "the_forgotten_banana_of_rebirth:dragon_banana"
+  }
+}

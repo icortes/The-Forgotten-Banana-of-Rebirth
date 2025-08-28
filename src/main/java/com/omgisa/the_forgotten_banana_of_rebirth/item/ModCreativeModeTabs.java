@@ -25,6 +25,7 @@ public class ModCreativeModeTabs {
                                                                 output.accept(ModItems.DIAMOND_BANANA);
                                                                 output.accept(ModItems.HARDENED_DIAMOND_BANANA);
                                                                 output.accept(ModItems.NETHERITE_BANANA);
+                                                                output.accept(ModItems.DRAGON_BANANA);
                                                             }).build());
 
     public static final Supplier<CreativeModeTab> BANANA_BLOCKS_TAB =

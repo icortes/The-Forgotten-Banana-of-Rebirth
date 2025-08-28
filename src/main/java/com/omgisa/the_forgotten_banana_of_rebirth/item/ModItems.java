@@ -2,10 +2,7 @@ package com.omgisa.the_forgotten_banana_of_rebirth.item;
 
 import com.omgisa.the_forgotten_banana_of_rebirth.TheForgottenBananaOfRebirth;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
-import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.BananaItem;
-import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.DiamondBananaItem;
-import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.HardenedDiamondBananaItem;
-import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.NetheriteBananaItem;
+import com.omgisa.the_forgotten_banana_of_rebirth.item.custom.*;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -19,6 +16,7 @@ public class ModItems {
     public static final DeferredItem<Item> DIAMOND_BANANA = ITEMS.registerItem("diamond_banana", DiamondBananaItem::new);
     public static final DeferredItem<Item> HARDENED_DIAMOND_BANANA = ITEMS.registerItem("hardened_diamond_banana", HardenedDiamondBananaItem::new);
     public static final DeferredItem<Item> NETHERITE_BANANA = ITEMS.registerItem("netherite_banana", NetheriteBananaItem::new);
+    public static final DeferredItem<Item> DRAGON_BANANA = ITEMS.registerItem("dragon_banana", DragonBananaItem::new);
     public static final DeferredItem<Item> TOMBSTONE = ITEMS.registerItem("tombstone", (properties) -> new BlockItem(ModBlocks.TOMBSTONE.get(), properties));
 
     public static void register(IEventBus eventBus) {

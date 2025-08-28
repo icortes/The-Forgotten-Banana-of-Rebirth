@@ -48,6 +48,18 @@ public class ModRecipeProvider extends RecipeProvider {
                            .pattern("NGN")
                            .unlockedBy(getHasName(Items.NETHERITE_INGOT), has(Items.NETHERITE_INGOT))
                            .save(this.output);
+
+        // Dragon Banana: center is Netherite Banana, include one Dragon Head and one Dragon Egg, rest Purpur Blocks
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, ModItems.DRAGON_BANANA.get())
+                           .define('P', Items.PURPUR_BLOCK)
+                           .define('H', Items.DRAGON_HEAD)
+                           .define('E', Items.DRAGON_EGG)
+                           .define('B', ModItems.NETHERITE_BANANA.get())
+                           .pattern("PHP")
+                           .pattern("PBP")
+                           .pattern("PEP")
+                           .unlockedBy(getHasName(ModItems.NETHERITE_BANANA.get()), has(ModItems.NETHERITE_BANANA.get()))
+                           .save(this.output);
     }
 
     public static class Runner extends RecipeProvider.Runner {

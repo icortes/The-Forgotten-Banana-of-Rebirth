@@ -1,7 +1,9 @@
-// 1.21.8	2025-08-26T18:11:09.679531	The Forgotten Banana of Rebirth: Recipes
+// 1.21.8	2025-08-27T17:59:09.2472285	The Forgotten Banana of Rebirth: Recipes
 67b59fcbf166342accd622a1d73c6337dfeb20a5 data/the_forgotten_banana_of_rebirth/advancement/recipes/misc/diamond_banana.json
+6ecc54cb15639c9020086aa623b8ea92e12d517b data/the_forgotten_banana_of_rebirth/advancement/recipes/misc/dragon_banana.json
 e4b89ad11d36ca7d1d82d4f077ccddfbc877ba0d data/the_forgotten_banana_of_rebirth/advancement/recipes/misc/hardened_diamond_banana.json
 645fdcb500159b689752f6321cb28e0a6cc497d2 data/the_forgotten_banana_of_rebirth/advancement/recipes/misc/netherite_banana.json
 3362a67e392bfdfd83be8c34687004ce3023bf57 data/the_forgotten_banana_of_rebirth/recipe/diamond_banana.json
+85bbbdd657082ba60e85fb6e1fc5a68749aae43d data/the_forgotten_banana_of_rebirth/recipe/dragon_banana.json
 4423b8498b7ec7658bb28487ebe0f31506b5c101 data/the_forgotten_banana_of_rebirth/recipe/hardened_diamond_banana.json
 fcc5dac78a2006c447affc1772bab5a4a1b6addd data/the_forgotten_banana_of_rebirth/recipe/netherite_banana.json

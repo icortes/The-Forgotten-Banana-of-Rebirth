@@ -11,6 +11,9 @@
   "item.the_forgotten_banana_of_rebirth.netherite_banana": "Netherite Banana",
   "item.the_forgotten_banana_of_rebirth.netherite_banana.tooltip": "Unbreakable resolve. Revives only those who died four times.",
 
+  "item.the_forgotten_banana_of_rebirth.dragon_banana": "Dragon Banana",
+  "item.the_forgotten_banana_of_rebirth.dragon_banana.tooltip": "Ascended fruit. Revives anyone with five deaths or more.",
+
   "item.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
 
   "block.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
