@@ -1,5 +1,6 @@
 package com.omgisa.the_forgotten_banana_of_rebirth.event;
 
+import com.omgisa.the_forgotten_banana_of_rebirth.Config;
 import com.omgisa.the_forgotten_banana_of_rebirth.TheForgottenBananaOfRebirth;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.custom.TombstoneBlock;
@@ -54,19 +55,6 @@ public class ModEvents {
     private static final Map<UUID, Integer> HEARTBEAT_COOLDOWN_TICK = new HashMap<>();
     // Track which players have the Darkness effect applied by this mod's low-health logic
     private static final Set<UUID> LOW_HEALTH_DARKNESS_OWNER = new HashSet<>();
-    // Heartbeat tuning constants
-    // Interval range in ticks: faster when health is lower
-    private static final int HEARTBEAT_INTERVAL_MIN_TICKS = 10;   // ~0.5s at 20 TPS
-    private static final int HEARTBEAT_INTERVAL_MAX_TICKS = 40;   // ~2.0s at 20 TPS
-    // Volume range: louder when health is lower
-    private static final float HEARTBEAT_VOLUME_MIN = 0.15f;
-    private static final float HEARTBEAT_VOLUME_MAX = 1.0f;
-    // Minimum health (in health points, not hearts) at or below which low-health effects trigger
-    private static final float LOW_HEALTH_THRESHOLD = 6.0f; // 3 hearts
-    // Minimum remaining max health in hearts; player max health will not drop below this value
-    private static final double MIN_MAX_HEALTH_HEARTS = 5.0; // 5 hearts => 10.0 health points
-    // Test toggle: when true, requires hardcore mode for death logic; when false, always runs regardless of hardcore.
-    public static boolean REQUIRE_HARDCORE_FOR_DEATH_LOGIC = true;
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -154,8 +142,8 @@ public class ModEvents {
             server.getPlayerList().broadcastSystemMessage(msg, false);
         }
 
-        // Server only and optional hardcore mode check (controlled by REQUIRE_HARDCORE_FOR_DEATH_LOGIC)
-        if (server == null || (REQUIRE_HARDCORE_FOR_DEATH_LOGIC && !server.isHardcore()))
+        // Server only and optional hardcore mode check (now configurable)
+        if (server == null || (Config.requireHardcoreForDeathLogic && !server.isHardcore()))
             return;
 
         ServerLevel level = player.level();
@@ -206,7 +194,7 @@ public class ModEvents {
         // 3) Remove one heart (2 health) from player's max health, clamped to minimum of configured hearts
         var maxHealthAttr = player.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
-            double minHealthPoints = MIN_MAX_HEALTH_HEARTS * 2.0; // convert hearts to health points
+            double minHealthPoints = Config.minMaxHealthHearts * 2.0; // convert hearts to health points
             double newBase = Math.max(minHealthPoints, maxHealthAttr.getBaseValue() - 2.0);
             maxHealthAttr.setBaseValue(newBase);
         }
@@ -223,7 +211,7 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerHealthBelowFourHearts(PlayerTickEvent.Post event) {
+    public static void onPlayerHealthBelowThreshold(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player))
             return;
         if (!player.isAlive())
@@ -233,11 +221,15 @@ public class ModEvents {
         UUID id = player.getUUID();
         var existing = player.getEffect(MobEffects.DARKNESS);
 
-        // Treat long-duration Darkness as external (e.g., Warden/Sculk). Our effect is ~60t; add buffer.
-        boolean externalDarknessActive = existing != null && (!LOW_HEALTH_DARKNESS_OWNER.contains(id) || existing.getDuration() > 80);
+        // Treat long-duration Darkness as external (e.g., Warden/Sculk). Our effect uses configured duration; add small buffer.
+        int ourDarknessDuration = Math.max(1, Config.darknessDurationTicks);
+        boolean externalDarknessActive = existing != null && (!LOW_HEALTH_DARKNESS_OWNER.contains(id) || existing.getDuration() > ourDarknessDuration + 20);
+
+        // Configurable low-health threshold in hearts -> convert to health points
+        float thresholdPoints = (float) (Config.lowHealthThreshold * 2.0);
 
         // Trigger when health is at or below the configured threshold (health points)
-        if (health < LOW_HEALTH_THRESHOLD) {
+        if (health < thresholdPoints) {
             if (externalDarknessActive) {
                 // Defer to external effect and stop our ownership/heartbeat to avoid interference
                 LOW_HEALTH_DARKNESS_OWNER.remove(id);
@@ -247,27 +239,33 @@ public class ModEvents {
 
             // Only apply our Darkness if none is present
             if (existing == null) {
-                player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0, true, false, true));
+                player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, ourDarknessDuration, 0, true, false, true));
                 LOW_HEALTH_DARKNESS_OWNER.add(id);
                 existing = player.getEffect(MobEffects.DARKNESS);
             }
 
-            // Refresh only if ours is present and running low
-            if (existing != null && existing.getDuration() <= 30) {
-                player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0, true, false, true));
+            // Refresh only if ours is present and running low (<= half of configured duration)
+            int refreshAt = Math.max(1, ourDarknessDuration / 2);
+            if (existing != null && LOW_HEALTH_DARKNESS_OWNER.contains(id) && existing.getDuration() <= refreshAt) {
+                player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, ourDarknessDuration, 0, true, false, true));
                 existing = player.getEffect(MobEffects.DARKNESS);
             }
 
             // Compute dynamic interval based on health (lower health -> faster heartbeat)
-            float denom = Math.max(0.001f, LOW_HEALTH_THRESHOLD);
+            float denom = Math.max(0.001f, thresholdPoints);
             float clamped = Math.max(0f, Math.min(denom, health));
-            int interval = HEARTBEAT_INTERVAL_MIN_TICKS + (int) ((HEARTBEAT_INTERVAL_MAX_TICKS - HEARTBEAT_INTERVAL_MIN_TICKS) * (clamped / denom));
-            // Compute dynamic volume based on health (lower health -> louder)
+            int intervalMin = Math.max(1, Config.heartbeatIntervalMinTicks);
+            int intervalMax = Math.max(intervalMin, Config.heartbeatIntervalMaxTicks);
+            int interval = intervalMin + (int) ((intervalMax - intervalMin) * (clamped / denom));
+            // Compute dynamic volume based on health (lower health -> louder) using configurable min/max
+            float volumeMin = (float) Config.heartbeatVolumeMin;
+            float volumeMax = (float) Config.heartbeatVolumeMax;
             float lowFactor = 1.0f - (clamped / denom); // 0 at threshold, 1 near 0 health
-            float volume = HEARTBEAT_VOLUME_MIN + (HEARTBEAT_VOLUME_MAX - HEARTBEAT_VOLUME_MIN) * lowFactor;
+            float volume = volumeMin + (volumeMax - volumeMin) * lowFactor;
+            float pitch = (float) Math.max(0.5f, Math.min(2.0f, Config.heartbeatPitch));
 
-            // Heartbeat only when our short Darkness is active; also allow faster reschedule if health dropped
-            if (existing != null && existing.getDuration() <= 80) {
+            // Heartbeat only when our Darkness is active (ownership check); also allow faster reschedule if health dropped
+            if (existing != null && LOW_HEALTH_DARKNESS_OWNER.contains(id)) {
                 int tick = player.tickCount;
                 int nextAllowed = HEARTBEAT_COOLDOWN_TICK.getOrDefault(id, 0);
                 // If health just dropped, pull nextAllowed closer so cadence speeds up immediately
@@ -284,7 +282,7 @@ public class ModEvents {
                             SoundEvents.WARDEN_HEARTBEAT,
                             SoundSource.PLAYERS,
                             volume,
-                            1.0f
+                            pitch
                     );
                     HEARTBEAT_COOLDOWN_TICK.put(id, tick + interval);
                 }
