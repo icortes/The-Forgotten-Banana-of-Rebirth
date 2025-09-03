@@ -44,6 +44,10 @@ public class Config {
     // Handle COMMON config load/reload
     @SubscribeEvent
     static void onCommonLoad(final ModConfigEvent event) {
+        // Only handle when config is being loaded or reloaded, not unloading
+        if (!(event instanceof ModConfigEvent.Loading || event instanceof ModConfigEvent.Reloading)) {
+            return;
+        }
         if (event.getConfig() == null || event.getConfig().getSpec() != COMMON_SPEC) {
             return;
         }
@@ -60,6 +64,10 @@ public class Config {
     // Handle SERVER config load/reload
     @SubscribeEvent
     static void onServerLoad(final ModConfigEvent event) {
+        // Only handle when config is being loaded or reloaded, not unloading
+        if (!(event instanceof ModConfigEvent.Loading || event instanceof ModConfigEvent.Reloading)) {
+            return;
+        }
         if (event.getConfig() == null || event.getConfig().getSpec() != SERVER_SPEC) {
             return;
         }
