@@ -17,6 +17,9 @@
   "item.the_forgotten_banana_of_rebirth.durian": "Durian",
   "item.the_forgotten_banana_of_rebirth.durian.tooltip": "A spiky delicacy with a rich aroma.",
 
+  "item.the_forgotten_banana_of_rebirth.enchanted_durian": "Enchanted Durian",
+  "item.the_forgotten_banana_of_rebirth.enchanted_durian.tooltip": "Eat to permanently gain +1 Heart.",
+
   "item.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",
 
   "block.the_forgotten_banana_of_rebirth.tombstone": "Tombstone",

@@ -20,6 +20,9 @@ public class ModItems {
     public static final DeferredItem<Item> TOMBSTONE = ITEMS.registerItem("tombstone", (properties) -> new BlockItem(ModBlocks.TOMBSTONE.get(), properties));
     // Durian stacks to 16
     public static final DeferredItem<Item> DURIAN = ITEMS.registerItem("durian", (properties) -> new DurianItem(properties.stacksTo(16).food(ModFoodProperties.DURIAN)));
+    // Enchanted Durian: its own item and model/texture
+    public static final DeferredItem<Item> ENCHANTED_DURIAN = ITEMS.registerItem("enchanted_durian",
+                                                                                 (properties) -> new EnchantedDurianItem(properties.stacksTo(16).food(ModFoodProperties.ENCHANTED_DURIAN)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

@@ -60,6 +60,19 @@ public class ModRecipeProvider extends RecipeProvider {
                            .pattern("PEP")
                            .unlockedBy(getHasName(ModItems.NETHERITE_BANANA.get()), has(ModItems.NETHERITE_BANANA.get()))
                            .save(this.output);
+
+        // Enchanted Durian: Shaped 3x3 pattern using Ghast Tears, Enchanted Golden Apples, Nether Star, Durian, and Dragon's Breath
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.FOOD, ModItems.ENCHANTED_DURIAN.get())
+                           .define('T', Items.GHAST_TEAR)
+                           .define('A', Items.ENCHANTED_GOLDEN_APPLE)
+                           .define('N', Items.NETHER_STAR)
+                           .define('D', ModItems.DURIAN.get())
+                           .define('B', Items.DRAGON_BREATH)
+                           .pattern("TAT")
+                           .pattern("NDB")
+                           .pattern("TAT")
+                           .unlockedBy(getHasName(ModItems.DURIAN.get()), has(ModItems.DURIAN.get()))
+                           .save(this.output);
     }
 
     public static class Runner extends RecipeProvider.Runner {

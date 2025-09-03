@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:enchanted_golden_apple",
+    "B": "minecraft:dragon_breath",
+    "D": "the_forgotten_banana_of_rebirth:durian",
+    "N": "minecraft:nether_star",
+    "T": "minecraft:ghast_tear"
+  },
+  "pattern": [
+    "TAT",
+    "NDB",
+    "TAT"
+  ],
+  "result": {
+    "count": 1,
+    "id": "the_forgotten_banana_of_rebirth:enchanted_durian"
+  }
+}

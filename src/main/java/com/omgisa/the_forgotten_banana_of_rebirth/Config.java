@@ -38,6 +38,8 @@ public class Config {
     public static double minMaxHealthHearts = 5.0D;
     public static boolean requireHardcoreForDeathLogic = true;
     public static int darknessDurationTicks = 60;
+    // New: Cap for max hearts achievable via permanent increases
+    public static double maxHeartsCapHearts = 20.0D;
 
     // Handle COMMON config load/reload
     @SubscribeEvent
@@ -72,6 +74,7 @@ public class Config {
         minMaxHealthHearts = SERVER.MIN_MAX_HEALTH_HEARTS.get();
         requireHardcoreForDeathLogic = SERVER.REQUIRE_HARDCORE_FOR_DEATH_LOGIC.get();
         darknessDurationTicks = SERVER.DARKNESS_DURATION_TICKS.get();
+        maxHeartsCapHearts = SERVER.MAX_HEARTS_CAP_HEARTS.get();
     }
 
     // Holder for COMMON config entries
@@ -100,6 +103,7 @@ public class Config {
         public final ModConfigSpec.DoubleValue MIN_MAX_HEALTH_HEARTS;
         public final ModConfigSpec.BooleanValue REQUIRE_HARDCORE_FOR_DEATH_LOGIC;
         public final ModConfigSpec.IntValue DARKNESS_DURATION_TICKS;
+        public final ModConfigSpec.DoubleValue MAX_HEARTS_CAP_HEARTS;
 
         public Server(ModConfigSpec.Builder builder) {
             builder.push("server");
@@ -115,6 +119,8 @@ public class Config {
                                                       .define("requireHardcoreForDeathLogic", true);
             DARKNESS_DURATION_TICKS = builder.comment("Duration (ticks) for Darkness effect at low health. Default: 60t (3s)")
                                              .defineInRange("darknessDurationTicks", 60, 1, 1200);
+            MAX_HEARTS_CAP_HEARTS = builder.comment("Maximum hearts a player can reach via permanent increases (e.g., Enchanted Durian). Default: 20.0 hearts")
+                                           .defineInRange("maxHeartsCapHearts", 20.0D, 1.0D, 100.0D);
             builder.pop();
         }
     }

@@ -27,6 +27,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(ModItems.NETHERITE_BANANA.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ModItems.DRAGON_BANANA.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ModItems.DURIAN.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ModItems.ENCHANTED_DURIAN.get(), ModelTemplates.FLAT_ITEM);
     }
 
     @Override
