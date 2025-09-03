@@ -18,6 +18,8 @@ public class ModItems {
     public static final DeferredItem<Item> NETHERITE_BANANA = ITEMS.registerItem("netherite_banana", NetheriteBananaItem::new);
     public static final DeferredItem<Item> DRAGON_BANANA = ITEMS.registerItem("dragon_banana", DragonBananaItem::new);
     public static final DeferredItem<Item> TOMBSTONE = ITEMS.registerItem("tombstone", (properties) -> new BlockItem(ModBlocks.TOMBSTONE.get(), properties));
+    // Durian stacks to 16
+    public static final DeferredItem<Item> DURIAN = ITEMS.registerItem("durian", (properties) -> new DurianItem(properties.stacksTo(16).food(ModFoodProperties.DURIAN)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

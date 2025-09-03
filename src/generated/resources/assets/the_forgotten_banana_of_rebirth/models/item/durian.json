@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "the_forgotten_banana_of_rebirth:item/durian"
+  }
+}
