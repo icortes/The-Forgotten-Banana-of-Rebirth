@@ -402,5 +402,21 @@ public class ModEvents {
             float priceMultiplier = 0.05f;
             return new MerchantOffer(price, result, maxUses, xp, priceMultiplier);
         });
+
+        // Master level (5) trade: Farmer sells 1 Durian for 30-60 emeralds, very limited use, solid XP
+        List<VillagerTrades.ItemListing> level5 = trades.computeIfAbsent(5, k -> new ArrayList<>());
+        level5.add((entity, random) -> {
+            // 25% chance to appear
+            if (random.nextFloat() >= 0.25f)
+                return null;
+
+            int emeraldCost = 30 + random.nextInt(31); // 30-60 emeralds
+            ItemCost price = new ItemCost(Items.EMERALD, emeraldCost);
+            ItemStack result = new ItemStack(ModItems.DURIAN.get(), 1);
+            int maxUses = 3;  // limited stock
+            int xp = 30;      // solid XP for a master-level premium trade
+            float priceMultiplier = 0.02f; // lower demand-based fluctuation for high-cost item
+            return new MerchantOffer(price, result, maxUses, xp, priceMultiplier);
+        });
     }
 }
