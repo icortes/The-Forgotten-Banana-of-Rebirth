@@ -1,5 +1,6 @@
 package com.omgisa.the_forgotten_banana_of_rebirth.event;
 
+import com.mojang.authlib.GameProfile;
 import com.omgisa.the_forgotten_banana_of_rebirth.Config;
 import com.omgisa.the_forgotten_banana_of_rebirth.TheForgottenBananaOfRebirth;
 import com.omgisa.the_forgotten_banana_of_rebirth.block.ModBlocks;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -382,6 +384,88 @@ public class ModEvents {
     }
 
     @SubscribeEvent
+    public static void onPlayerRightClicksTombstoneEmptyHanded(PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer clicker))
+            return;
+        ServerLevel level = (ServerLevel) event.getLevel();
+        if (level.isClientSide)
+            return;
+
+        // Only when empty-handed
+        if (!event.getItemStack().isEmpty())
+            return;
+
+        BlockEntity be = level.getBlockEntity(event.getPos());
+        if (!(be instanceof TombstoneBlockEntity tombstone))
+            return;
+
+        Optional<UUID> ownerIdOpt = tombstone.getOwnerUuid();
+        if (ownerIdOpt.isEmpty()) {
+            clicker.sendSystemMessage(Component.literal("This tombstone has no owner."));
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
+        }
+
+        UUID ownerId = ownerIdOpt.get();
+        var server = level.getServer();
+        ServerPlayer owner = server.getPlayerList().getPlayer(ownerId);
+
+        // Resolve owner's name even if offline (null-safe cache access)
+        String ownerName;
+        if (owner != null) {
+            ownerName = owner.getGameProfile().getName();
+        } else {
+            var cache = server.getProfileCache();
+            ownerName = cache != null ? cache.get(ownerId).map(GameProfile::getName).orElse("Unknown") : "Unknown";
+        }
+
+        // Read deaths from scoreboard
+        Scoreboard scoreboard = level.getScoreboard();
+        Objective objective = scoreboard.getObjective("deaths");
+        Integer deaths = null;
+        if (objective != null) {
+            try {
+                if (owner != null) {
+                    deaths = scoreboard.getOrCreatePlayerScore(owner, objective).get();
+                } else if (!"Unknown".equals(ownerName)) {
+                    var holder = ScoreHolder.forNameOnly(ownerName);
+                    deaths = scoreboard.getOrCreatePlayerScore(holder, objective).get();
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        Component advice;
+        if (deaths != null) {
+            ItemStack required;
+            if (deaths <= 1) {
+                required = new ItemStack(ModItems.BANANA.get());
+            } else if (deaths == 2) {
+                required = new ItemStack(ModItems.DIAMOND_BANANA.get());
+            } else if (deaths == 3) {
+                required = new ItemStack(ModItems.HARDENED_DIAMOND_BANANA.get());
+            } else if (deaths == 4) {
+                required = new ItemStack(ModItems.NETHERITE_BANANA.get());
+            } else {
+                required = new ItemStack(ModItems.DRAGON_BANANA.get());
+            }
+            advice = Component.literal("To revive ")
+                              .append(Component.literal(ownerName).withStyle(ChatFormatting.GOLD))
+                              .append(Component.literal(" (deaths: " + deaths + "), use: "))
+                              .append(required.getHoverName().copy().withStyle(ChatFormatting.YELLOW));
+        } else {
+            advice = Component.literal("Tomb of ")
+                              .append(Component.literal(ownerName).withStyle(ChatFormatting.GOLD))
+                              .append(Component.literal(": use Banana (1), Diamond Banana (2), Hardened Diamond Banana (3), Netherite Banana (4), Dragon Banana (5+)."));
+        }
+
+        clicker.sendSystemMessage(advice);
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.SUCCESS);
+    }
+
+    @SubscribeEvent
     public static void onVillagerTrades(VillagerTradesEvent event) {
         if (event.getType() != VillagerProfession.FARMER)
             return;
@@ -420,3 +504,4 @@ public class ModEvents {
         });
     }
 }
+
